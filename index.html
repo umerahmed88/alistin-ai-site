@@ -23,15 +23,6 @@
     <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Import Map for Gemini SDK -->
-    <script type="importmap">
-      {
-        "imports": {
-          "@google/genai": "https://esm.run/@google/genai"
-        }
-      }
-    </script>
-
     <!-- Tailwind Config -->
     <script>
       tailwind.config = {
@@ -112,15 +103,20 @@
     <script>
       window.process = {
         env: {
-          // ⚠️ IMPORTANT: Replace this with your actual API Key from aistudio.google.com
-          API_KEY: "AIzaSyCwO_x8Kir7IWlAQpjKQqDUJKAhOVJNmno" 
+          // ⚠️ IMPORTANT:
+          // 1. Create a new API Key at aistudio.google.com
+          // 2. Go to Google Cloud Console > Credentials
+          // 3. EDIT the key and set "Application restrictions" to "Websites"
+          // 4. Add "https://www.alistin-ai.com" and "https://alistin-ai.com"
+          // 5. Paste the new key below.
+          API_KEY: "AIzaSyBYGbHW5QmLfk5qPIAKWVdv4UKyt51qHo4" 
         }
       };
     </script>
 
     <!-- Application Script -->
     <script type="text/babel" data-type="module">
-      import { GoogleGenAI } from "@google/genai";
+      import { GoogleGenAI } from "https://esm.run/@google/genai";
       const { useState, useEffect, useRef } = React;
 
       // --- Icons (SVG Components) ---
@@ -293,7 +289,7 @@
         
         const messagesEndRef = useRef(null);
         const apiKey = window.process?.env?.API_KEY;
-        const hasApiKey = apiKey && apiKey !== "YOUR_GEMINI_API_KEY_HERE";
+        const hasApiKey = apiKey && apiKey !== "PASTE_YOUR_NEW_RESTRICTED_KEY_HERE";
 
         const scrollToBottom = () => {
           messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
