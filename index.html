@@ -103,13 +103,14 @@
     <script>
       window.process = {
         env: {
-          // ⚠️ IMPORTANT:
-          // 1. Create a new API Key at aistudio.google.com
-          // 2. Go to Google Cloud Console > Credentials
-          // 3. EDIT the key and set "Application restrictions" to "Websites"
-          // 4. Add "https://www.alistin-ai.com" and "https://alistin-ai.com"
-          // 5. Paste the new key below.
-          API_KEY: "AIzaSyBYGbHW5QmLfk5qPIAKWVdv4UKyt51qHo4" 
+          // ⚠️ IMPORTANT INSTRUCTIONS:
+          // 1. You MUST generate a NEW API Key at aistudio.google.com (The old one is revoked).
+          // 2. Go to Google Cloud Console > Credentials > Select Key.
+          // 3. Under "Application restrictions", choose "Websites".
+          // 4. Add BOTH "https://www.alistin-ai.com" AND "https://alistin-ai.com"
+          // 5. Click Save and wait 5 minutes.
+          // 6. Paste the new key below inside the quotes.
+          API_KEY: "AIzaSyA0GEpnYiQxa-PYgQ9Jkou5CvaRR8CNCcc" 
         }
       };
     </script>
@@ -289,7 +290,7 @@
         
         const messagesEndRef = useRef(null);
         const apiKey = window.process?.env?.API_KEY;
-        const hasApiKey = apiKey && apiKey !== "PASTE_YOUR_NEW_RESTRICTED_KEY_HERE";
+        const hasApiKey = apiKey && apiKey !== "PASTE_YOUR_NEW_RESTRICTED_KEY_HERE" && apiKey.startsWith('AIza');
 
         const scrollToBottom = () => {
           messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -328,22 +329,39 @@
 
           try {
             if (!hasApiKey) {
-              // Fallback if no API key is set
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              await new Promise(resolve => setTimeout(resolve, 800));
               setMessages(prev => [...prev, { 
                 role: 'model', 
-                text: "I'm currently in demo mode without an active API key. Please add your Gemini API Key in the index.html file to enable my full intelligence! For now, I can tell you that Al IstinAi automates your business processes 24/7.", 
+                text: "I'm currently in demo mode. To enable my intelligence, please generate a valid API Key at aistudio.google.com and paste it into the index.html file.", 
                 timestamp: new Date() 
               }]);
             } else if (chatSession) {
-              // Real AI Call
               const result = await chatSession.sendMessage({ message: userText });
               const aiText = result.text;
               setMessages(prev => [...prev, { role: 'model', text: aiText, timestamp: new Date() }]);
+            } else {
+              // Session not initialized yet
+              const ai = new GoogleGenAI({ apiKey: apiKey });
+              const chat = ai.chats.create({
+                  model: 'gemini-2.5-flash',
+                  config: { systemInstruction: "You are Al, the AI representative for Al IstinAi." },
+              });
+              const result = await chat.sendMessage({ message: userText });
+              setChatSession(chat);
+              setMessages(prev => [...prev, { role: 'model', text: result.text, timestamp: new Date() }]);
             }
           } catch (error) {
             console.error("AI Error:", error);
-            setMessages(prev => [...prev, { role: 'model', text: "I'm having trouble connecting to the server right now. Please try again later.", timestamp: new Date() }]);
+            let errorMessage = "I'm having trouble connecting to the server right now.";
+            
+            // Provide more specific error feedback
+            if (error.message && error.message.includes('403')) {
+                errorMessage = "Access Denied. It looks like the API Key is restricted. Please check that 'www.alistin-ai.com' is added to the authorized domains in Google Cloud Console.";
+            } else if (error.message && error.message.includes('400')) {
+                errorMessage = "Invalid Request. The API Key may be invalid or expired.";
+            }
+
+            setMessages(prev => [...prev, { role: 'model', text: errorMessage, timestamp: new Date() }]);
           } finally {
             setIsLoading(false);
           }
@@ -368,7 +386,7 @@
                     <div>
                       <h3 className="font-bold text-white text-sm">Al IstinAi Live Assistant</h3>
                       <span className="flex items-center gap-1 text-xs text-cyan-400">
-                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <span className={`w-2 h-2 rounded-full ${hasApiKey ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`}></span>
                         {hasApiKey ? 'AI Connected' : 'Demo Mode'}
                       </span>
                     </div>
