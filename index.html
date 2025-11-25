@@ -14,7 +14,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -30,6 +30,7 @@
           extend: {
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
+              arabic: ['Cairo', 'sans-serif'],
             },
             colors: {
               primary: '#1E3A8A', 
@@ -70,6 +71,9 @@
         overflow-x: hidden;
         scroll-behavior: smooth;
       }
+      body[dir="rtl"] {
+        font-family: 'Cairo', sans-serif;
+      }
       .gradient-text {
         background: linear-gradient(to right, #06B6D4, #8B5CF6);
         -webkit-background-clip: text;
@@ -99,17 +103,11 @@
 <body>
     <div id="root"></div>
 
-    <!-- Environment Config Shim (For Browser-only deployment) -->
+    <!-- Environment Config Shim -->
     <script>
       window.process = {
         env: {
-          // ⚠️ IMPORTANT INSTRUCTIONS:
-          // 1. You MUST generate a NEW API Key at aistudio.google.com (The old one is revoked).
-          // 2. Go to Google Cloud Console > Credentials > Select Key.
-          // 3. Under "Application restrictions", choose "Websites".
-          // 4. Add BOTH "https://www.alistin-ai.com" AND "https://alistin-ai.com"
-          // 5. Click Save and wait 5 minutes.
-          // 6. Paste the new key below inside the quotes.
+          // ⚠️ IMPORTANT: Paste your Restricted API Key below
           API_KEY: "AIzaSyA0GEpnYiQxa-PYgQ9Jkou5CvaRR8CNCcc" 
         }
       };
@@ -119,6 +117,196 @@
     <script type="text/babel" data-type="module">
       import { GoogleGenAI } from "https://esm.run/@google/genai";
       const { useState, useEffect, useRef } = React;
+
+      // --- Translations ---
+      const content = {
+        en: {
+          nav: {
+            solutions: "Solutions",
+            howItWorks: "How it Works",
+            pricing: "Pricing",
+            contact: "Contact",
+            login: "Log In",
+            startTrial: "Start Free Trial"
+          },
+          hero: {
+            badge: "New: Al IstinAi 2.0 is now live",
+            headlineStart: "Automate Smart.",
+            headlineEnd: "Scale Fast.",
+            subheadline: "Deploy intelligent AI agents that work 24/7 across sales, marketing, and operations. Scale your business without scaling your headcount.",
+            ctaPrimary: "Start Free Trial",
+            ctaSecondary: "Watch Demo"
+          },
+          stats: {
+            revenue: "Revenue Increase",
+            hours: "Hours Saved/Week",
+            cost: "Cost Reduction",
+            satisfaction: "Cust. Satisfaction"
+          },
+          trust: "Trusted by 500+ High-Growth Companies",
+          features: {
+            title: "Meet Your New",
+            titleHighlight: "AI Workforce",
+            subtitle: "Our intelligent agents learn, adapt, and execute complex workflows autonomously.",
+            items: [
+              { title: "Sales Agent", desc: "Autonomous lead qualification, follow-ups, and pipeline management.", benefits: ["Lead Scoring", "Meeting Scheduling", "CRM Sync"] },
+              { title: "Marketing Agent", desc: "Create content, manage campaigns, and optimize for conversion 24/7.", benefits: ["Content Generation", "Social Auto-posting", "A/B Testing"] },
+              { title: "Customer Service", desc: "Instant, intelligent support resolving tickets without human intervention.", benefits: ["24/7 Response", "Sentiment Analysis", "Smart Routing"] },
+              { title: "Operations", desc: "Streamline workflows, validate data, and coordinate tasks across teams.", benefits: ["Workflow Automation", "Data Validation", "Reporting"] }
+            ]
+          },
+          howItWorks: {
+            title: "How Al IstinAi Works",
+            steps: [
+              { title: "Connect", desc: "Integrate with your existing tools in minutes." },
+              { title: "Configure", desc: "Customize agents to your specific business needs." },
+              { title: "Deploy", desc: "Launch AI agents across your workflows instantly." },
+              { title: "Scale", desc: "Watch your business grow on autopilot." }
+            ]
+          },
+          pricing: {
+            title: "Simple, Transparent Pricing",
+            subtitle: "Start with a 14-day free trial. No credit card required.",
+            popular: "Most Popular",
+            cta: {
+              starter: "Start Free Trial",
+              growth: "Get Started",
+              enterprise: "Contact Sales"
+            },
+            plans: [
+              { name: "Starter", desc: "Perfect for small teams getting started with automation.", features: ["1 AI Agent", "1,000 Tasks/mo", "Email Support", "Basic Analytics"] },
+              { name: "Growth", desc: "For scaling businesses needing comprehensive coverage.", features: ["3 AI Agents", "10,000 Tasks/mo", "Priority Support", "Advanced Workflows", "CRM Integrations"] },
+              { name: "Enterprise", desc: "Full-scale automation for large organizations.", features: ["Unlimited Agents", "Unlimited Tasks", "Dedicated Success Manager", "SSO & Audit Logs", "On-premise Deployment"] }
+            ]
+          },
+          contact: {
+            title: "Ready to Transform Your Business?",
+            subtitle: "Join 500+ forward-thinking companies growing with Al IstinAi today.",
+            placeholder: "Enter your work email",
+            cta: "Get Started",
+            note: "No credit card required. Cancel anytime."
+          },
+          footer: {
+            tagline: "Empowering businesses with intelligent automation. We build the future of work.",
+            product: "Product",
+            company: "Company",
+            legal: "Legal",
+            rights: "© 2024 Al IstinAi Inc. All rights reserved."
+          },
+          chat: {
+            title: "Al IstinAi Live Assistant",
+            statusConnected: "AI Connected",
+            statusDemo: "Demo Mode",
+            placeholder: "Ask me anything about automation...",
+            thinking: "Thinking...",
+            welcome: "Hello! I'm Al, your Al IstinAi demo agent. Ask me to write a sales email, analyze a metric, or explain how we can automate your workflow!",
+            systemPrompt: "You are Al, the AI representative for Al IstinAi. You help businesses understand automation. You are professional, concise, and persuasive. Your goal is to explain how AI agents can solve business problems in Sales, Marketing, Customer Service, and Operations. If asked about pricing, mention plans start at $99/mo. Always encourage the user to book a demo."
+          },
+          toast: {
+            emailError: "Please enter a valid email address.",
+            emailSuccess: "Thanks! We've sent a getting started guide to your inbox.",
+            planSelected: "Selected {plan} plan. Redirecting to checkout..."
+          },
+          cookie: {
+            text: "We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.",
+            decline: "Decline",
+            accept: "Accept"
+          }
+        },
+        ar: {
+          nav: {
+            solutions: "الحلول",
+            howItWorks: "كيف يعمل",
+            pricing: "الأسعار",
+            contact: "اتصل بنا",
+            login: "تسجيل الدخول",
+            startTrial: "ابدأ التجربة المجانية"
+          },
+          hero: {
+            badge: "جديد: الإصدار 2.0 من Al IstinAi متاح الآن",
+            headlineStart: "أتمتة ذكية.",
+            headlineEnd: "نمو سريع.",
+            subheadline: "انشر وكلاء الذكاء الاصطناعي الأذكياء الذين يعملون على مدار الساعة عبر المبيعات والتسويق والعمليات. وسع نطاق عملك دون زيادة عدد الموظفين.",
+            ctaPrimary: "ابدأ التجربة المجانية",
+            ctaSecondary: "شاهد العرض التوضيحي"
+          },
+          stats: {
+            revenue: "زيادة في الإيرادات",
+            hours: "ساعات موفرة/أسبوعياً",
+            cost: "خفـض التكاليـف",
+            satisfaction: "رضا العملاء"
+          },
+          trust: "موثوق به من قبل أكثر من 500 شركة سريعة النمو",
+          features: {
+            title: "تعرف على",
+            titleHighlight: "فريق عملك الذكي",
+            subtitle: "وكلاؤنا الأذكياء يتعلمون ويتكيفون وينفذون سير العمل المعقد بشكل مستقل.",
+            items: [
+              { title: "وكيل المبيعات", desc: "تأهيل العملاء المحتملين تلقائيًا، والمتابعة، وإدارة خطط المبيعات.", benefits: ["تسجيل النقاط للعملاء", "جدولة الاجتماعات", "مزامنة CRM"] },
+              { title: "وكيل التسويق", desc: "إنشاء المحتوى وإدارة الحملات والتحسين من أجل التحويل على مدار الساعة طوال أيام الأسبوع.", benefits: ["توليد المحتوى", "النشر التلقائي", "اختبار A/B"] },
+              { title: "خدمة العملاء", desc: "دعم فوري وذكي لحل التذاكر دون تدخل بشري.", benefits: ["استجابة 24/7", "تحليل المشاعر", "التوجيه الذكي"] },
+              { title: "العمليات", desc: "تبسيط سير العمل، والتحقق من صحة البيانات، وتنسيق المهام عبر الفرق.", benefits: ["أتمتة سير العمل", "التحقق من البيانات", "التقارير"] }
+            ]
+          },
+          howItWorks: {
+            title: "كيف يعمل Al IstinAi",
+            steps: [
+              { title: "ربط", desc: "تكامل مع أدواتك الحالية في دقائق." },
+              { title: "تكوين", desc: "خصص الوكلاء لاحتياجات عملك المحددة." },
+              { title: "نشر", desc: "أطلق وكلاء الذكاء الاصطناعي عبر سير عملك فوراً." },
+              { title: "توسع", desc: "شاهد عملك ينمو تلقائياً." }
+            ]
+          },
+          pricing: {
+            title: "أسعار بسيطة وشفافة",
+            subtitle: "ابدأ بتجربة مجانية لمدة 14 يومًا. لا حاجة لبطاقة ائتمان.",
+            popular: "الأكثر شيوعاً",
+            cta: {
+              starter: "ابدأ التجربة المجانية",
+              growth: "ابدأ الآن",
+              enterprise: "تواصل مع المبيعات"
+            },
+            plans: [
+              { name: "البداية", desc: "مثالي للفرق الصغيرة التي تبدأ في الأتمتة.", features: ["1 وكيل ذكاء اصطناعي", "1,000 مهمة/شهر", "دعم عبر البريد الإلكتروني", "تحليلات أساسية"] },
+              { name: "النمو", desc: "للشركات المتوسعة التي تحتاج إلى تغطية شاملة.", features: ["3 وكلاء ذكاء اصطناعي", "10,000 مهمة/شهر", "أولوية الدعم", "سير عمل متقدم", "تكاملات CRM"] },
+              { name: "المؤسسات", desc: "أتمتة شاملة للمؤسسات الكبيرة.", features: ["وكلاء غير محدودين", "مهام غير محدودة", "مدير نجاح مخصص", "سجلات التدقيق و SSO", "نشر محلي"] }
+            ]
+          },
+          contact: {
+            title: "هل أنت مستعد لتحويل عملك؟",
+            subtitle: "انضم إلى أكثر من 500 شركة ذات تفكير مستقبلي تنمو مع Al IstinAi اليوم.",
+            placeholder: "أدخل بريد العمل الخاص بك",
+            cta: "ابدأ الآن",
+            note: "لا حاجة لبطاقة ائتمان. يمكنك الإلغاء في أي وقت."
+          },
+          footer: {
+            tagline: "تمكين الشركات من خلال الأتمتة الذكية. نحن نبني مستقبل العمل.",
+            product: "المنتج",
+            company: "الشركة",
+            legal: "قانوني",
+            rights: "© 2024 Al IstinAi Inc. جميع الحقوق محفوظة."
+          },
+          chat: {
+            title: "مساعد Al IstinAi المباشر",
+            statusConnected: "متصل",
+            statusDemo: "وضع تجريبي",
+            placeholder: "اسألني أي شيء عن الأتمتة...",
+            thinking: "يفكر...",
+            welcome: "مرحباً! أنا 'أل'، وكيل Al IstinAi التجريبي. اطلب مني كتابة بريد إلكتروني للمبيعات، أو تحليل مقياس، أو شرح كيف يمكننا أتمتة سير عملك!",
+            systemPrompt: "أنت 'أل'، الممثل الذكي لمنصة Al IstinAi. أنت تساعد الشركات على فهم الأتمتة. أنت محترف ومقنع. هدفك هو شرح كيفية قيام وكلاء الذكاء الاصطناعي بحل مشاكل المبيعات والتسويق وخدمة العملاء والعمليات. تحدث باللغة العربية بطلاقة واحترافية. إذا سُئلت عن الأسعار، اذكر أن الخطط تبدأ من 99 دولارًا شهريًا. شجع المستخدم دائمًا على حجز عرض توضيحي."
+          },
+          toast: {
+            emailError: "يرجى إدخال عنوان بريد إلكتروني صالح.",
+            emailSuccess: "شكرًا! لقد أرسلنا دليل البدء إلى بريدك الوارد.",
+            planSelected: "تم اختيار خطة {plan}. جاري إعادة التوجيه للدفع..."
+          },
+          cookie: {
+            text: "نحن نستخدم ملفات تعريف الارتباط لتحسين تجربتك. من خلال الاستمرار في زيارة هذا الموقع، فإنك توافق على استخدامنا لملفات تعريف الارتباط.",
+            decline: "رفض",
+            accept: "قبول"
+          }
+        }
+      };
 
       // --- Icons (SVG Components) ---
       const Zap = ({ size = 24, className = "" }) => (
@@ -145,9 +333,6 @@
       const Play = ({ size = 24, className = "" }) => (
         <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="5 3 19 12 5 21 5 3"/></svg>
       );
-      const ChevronRight = ({ size = 24, className = "" }) => (
-        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="9 18 15 12 9 6"/></svg>
-      );
       const Menu = ({ size = 24, className = "" }) => (
         <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       );
@@ -172,92 +357,12 @@
       const ArrowUp = ({ size = 24, className = "" }) => (
         <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
       );
-
-      // --- Data ---
-      const metrics = [
-        { id: '1', value: '3x', label: 'Revenue Increase', icon: TrendingUp },
-        { id: '2', value: '40+', label: 'Hours Saved/Week', icon: Clock },
-        { id: '3', value: '60%', label: 'Cost Reduction', icon: Zap },
-        { id: '4', value: '95%', label: 'Cust. Satisfaction', icon: Users },
-      ];
-
-      const features = [
-        {
-          id: 'sales',
-          title: 'Sales Agent',
-          description: 'Autonomous lead qualification, follow-ups, and pipeline management.',
-          icon: TrendingUp,
-          benefits: ['Lead Scoring', 'Meeting Scheduling', 'CRM Sync']
-        },
-        {
-          id: 'marketing',
-          title: 'Marketing Agent',
-          description: 'Create content, manage campaigns, and optimize for conversion 24/7.',
-          icon: Globe,
-          benefits: ['Content Generation', 'Social Auto-posting', 'A/B Testing']
-        },
-        {
-          id: 'support',
-          title: 'Customer Service',
-          description: 'Instant, intelligent support resolving tickets without human intervention.',
-          icon: Phone,
-          benefits: ['24/7 Response', 'Sentiment Analysis', 'Smart Routing']
-        },
-        {
-          id: 'ops',
-          title: 'Operations',
-          description: 'Streamline workflows, validate data, and coordinate tasks across teams.',
-          icon: Zap,
-          benefits: ['Workflow Automation', 'Data Validation', 'Reporting']
-        }
-      ];
-
-      const pricing = [
-        {
-          name: 'Starter',
-          price: '$99',
-          period: '/mo',
-          description: 'Perfect for small teams getting started with automation.',
-          features: ['1 AI Agent', '1,000 Tasks/mo', 'Email Support', 'Basic Analytics'],
-          cta: 'Start Free Trial'
-        },
-        {
-          name: 'Growth',
-          price: '$299',
-          period: '/mo',
-          description: 'For scaling businesses needing comprehensive coverage.',
-          features: ['3 AI Agents', '10,000 Tasks/mo', 'Priority Support', 'Advanced Workflows', 'CRM Integrations'],
-          cta: 'Get Started',
-          popular: true
-        },
-        {
-          name: 'Enterprise',
-          price: 'Custom',
-          period: '',
-          description: 'Full-scale automation for large organizations.',
-          features: ['Unlimited Agents', 'Unlimited Tasks', 'Dedicated Success Manager', 'SSO & Audit Logs', 'On-premise Deployment'],
-          cta: 'Contact Sales'
-        }
-      ];
-
-      const testimonials = [
-        {
-          quote: "Al IstinAi transformed our sales process. Our response time went from hours to seconds.",
-          author: "Sarah Jenkings",
-          role: "VP of Sales, TechFlow",
-          image: "https://picsum.photos/100/100?random=1"
-        },
-        {
-          quote: "The marketing agent creates better copy than our previous agency, and it does it instantly.",
-          author: "Marcus Chen",
-          role: "CMO, RetailGiant",
-          image: "https://picsum.photos/100/100?random=2"
-        }
-      ];
+      const Languages = ({ size = 24, className = "" }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+      );
 
       // --- Components ---
       
-      // Toast Notification Component
       const Toast = ({ message, type, onClose }) => {
         useEffect(() => {
           const timer = setTimeout(onClose, 3000);
@@ -267,30 +372,35 @@
         const bgClass = type === 'success' ? 'bg-green-500' : 'bg-red-500';
 
         return (
-          <div className={`fixed top-24 right-6 z-50 flex items-center gap-3 px-6 py-4 rounded-lg shadow-2xl text-white ${bgClass} animate-slide-up`}>
+          <div className={`fixed top-24 right-6 rtl:left-6 rtl:right-auto z-50 flex items-center gap-3 px-6 py-4 rounded-lg shadow-2xl text-white ${bgClass} animate-slide-up`}>
             {type === 'success' ? <CheckCircle size={20} /> : <X size={20} />}
             <span className="font-medium">{message}</span>
           </div>
         );
       };
 
-      // Real AI Demo Widget
-      const DemoWidget = () => {
+      const DemoWidget = ({ lang, t }) => {
         const [isOpen, setIsOpen] = useState(false);
         const [input, setInput] = useState('');
         const [isLoading, setIsLoading] = useState(false);
-        const [messages, setMessages] = useState([
-          {
-            role: 'model',
-            text: "Hello! I'm Al, your Al IstinAi demo agent. Ask me to write a sales email, analyze a metric, or explain how we can automate your workflow!",
-            timestamp: new Date()
-          }
-        ]);
+        const [messages, setMessages] = useState([]);
         const [chatSession, setChatSession] = useState(null);
         
         const messagesEndRef = useRef(null);
         const apiKey = window.process?.env?.API_KEY;
         const hasApiKey = apiKey && apiKey !== "PASTE_YOUR_NEW_RESTRICTED_KEY_HERE" && apiKey.startsWith('AIza');
+
+        // Reset chat when language changes
+        useEffect(() => {
+          setMessages([
+            {
+              role: 'model',
+              text: t.chat.welcome,
+              timestamp: new Date()
+            }
+          ]);
+          setChatSession(null);
+        }, [lang, t]);
 
         const scrollToBottom = () => {
           messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -300,7 +410,6 @@
           scrollToBottom();
         }, [messages, isOpen]);
 
-        // Initialize Chat Session
         useEffect(() => {
           if (isOpen && !chatSession && hasApiKey) {
              try {
@@ -308,7 +417,7 @@
                 const chat = ai.chats.create({
                   model: 'gemini-2.5-flash',
                   config: {
-                    systemInstruction: "You are Al, the AI representative for Al IstinAi. You help businesses understand automation. You are professional, concise, and persuasive. Your goal is to explain how AI agents can solve business problems in Sales, Marketing, Customer Service, and Operations. If asked about pricing, mention plans start at $99/mo. Always encourage the user to book a demo.",
+                    systemInstruction: t.chat.systemPrompt,
                   },
                 });
                 setChatSession(chat);
@@ -316,7 +425,7 @@
                console.error("Failed to init AI", e);
              }
           }
-        }, [isOpen, hasApiKey]);
+        }, [isOpen, hasApiKey, t]);
 
         const handleSend = async () => {
           if (!input.trim() || isLoading) return;
@@ -332,7 +441,9 @@
               await new Promise(resolve => setTimeout(resolve, 800));
               setMessages(prev => [...prev, { 
                 role: 'model', 
-                text: "I'm currently in demo mode. To enable my intelligence, please generate a valid API Key at aistudio.google.com and paste it into the index.html file.", 
+                text: lang === 'en' 
+                    ? "I'm currently in demo mode. To enable my intelligence, please generate a valid API Key at aistudio.google.com and paste it into the index.html file."
+                    : "أنا حاليًا في الوضع التجريبي. لتمكين ذكائي، يرجى إنشاء مفتاح API صالح في aistudio.google.com ولصقه في ملف index.html.",
                 timestamp: new Date() 
               }]);
             } else if (chatSession) {
@@ -340,11 +451,10 @@
               const aiText = result.text;
               setMessages(prev => [...prev, { role: 'model', text: aiText, timestamp: new Date() }]);
             } else {
-              // Session not initialized yet
               const ai = new GoogleGenAI({ apiKey: apiKey });
               const chat = ai.chats.create({
                   model: 'gemini-2.5-flash',
-                  config: { systemInstruction: "You are Al, the AI representative for Al IstinAi." },
+                  config: { systemInstruction: t.chat.systemPrompt },
               });
               const result = await chat.sendMessage({ message: userText });
               setChatSession(chat);
@@ -352,13 +462,12 @@
             }
           } catch (error) {
             console.error("AI Error:", error);
-            let errorMessage = "I'm having trouble connecting to the server right now.";
+            let errorMessage = lang === 'en' ? "I'm having trouble connecting to the server right now." : "أواجه مشكلة في الاتصال بالخادم الآن.";
             
-            // Provide more specific error feedback
             if (error.message && error.message.includes('403')) {
-                errorMessage = "Access Denied. It looks like the API Key is restricted. Please check that 'www.alistin-ai.com' is added to the authorized domains in Google Cloud Console.";
-            } else if (error.message && error.message.includes('400')) {
-                errorMessage = "Invalid Request. The API Key may be invalid or expired.";
+                errorMessage = lang === 'en' 
+                    ? "Access Denied. Check API Key domain restrictions." 
+                    : "تم رفض الوصول. تحقق من قيود نطاق مفتاح API.";
             }
 
             setMessages(prev => [...prev, { role: 'model', text: errorMessage, timestamp: new Date() }]);
@@ -375,19 +484,19 @@
         };
 
         return (
-          <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+          <div className="fixed bottom-6 right-6 left-auto rtl:right-auto rtl:left-6 z-50 flex flex-col items-end rtl:items-start">
             {isOpen && (
               <div className="mb-4 w-[300px] sm:w-[350px] md:w-[400px] h-[400px] sm:h-[500px] bg-slate-900 border border-cyan-500/30 rounded-2xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl animate-fade-in transition-all duration-300">
-                <div className="bg-gradient-to-r from-blue-900 to-slate-900 p-4 flex justify-between items-center border-b border-white/10">
+                <div className="bg-gradient-to-r from-blue-900 to-slate-900 p-4 flex justify-between items-center border-b border-white/10" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
                   <div className="flex items-center gap-2">
                     <div className="bg-cyan-500 p-1.5 rounded-full">
                       <Bot size={18} className="text-white" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-white text-sm">Al IstinAi Live Assistant</h3>
+                      <h3 className="font-bold text-white text-sm">{t.chat.title}</h3>
                       <span className="flex items-center gap-1 text-xs text-cyan-400">
                         <span className={`w-2 h-2 rounded-full ${hasApiKey ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`}></span>
-                        {hasApiKey ? 'AI Connected' : 'Demo Mode'}
+                        {hasApiKey ? t.chat.statusConnected : t.chat.statusDemo}
                       </span>
                     </div>
                   </div>
@@ -399,7 +508,7 @@
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-950/50">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-950/50" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
                   {messages.map((msg, idx) => (
                     <div 
                       key={idx} 
@@ -408,8 +517,8 @@
                       <div 
                         className={`max-w-[85%] rounded-2xl p-3 text-sm ${
                           msg.role === 'user' 
-                            ? 'bg-blue-600 text-white rounded-br-none' 
-                            : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-none'
+                            ? 'bg-blue-600 text-white rounded-br-none rtl:rounded-bl-none rtl:rounded-br-2xl' 
+                            : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-none rtl:rounded-br-none rtl:rounded-bl-2xl'
                         }`}
                       >
                         {msg.role === 'model' && (
@@ -423,31 +532,31 @@
                   ))}
                   {isLoading && (
                     <div className="flex justify-start">
-                      <div className="bg-slate-800 border border-slate-700 rounded-2xl rounded-bl-none p-3 flex items-center gap-2">
+                      <div className="bg-slate-800 border border-slate-700 rounded-2xl rounded-bl-none rtl:rounded-br-none rtl:rounded-bl-2xl p-3 flex items-center gap-2">
                         <Loader2 size={16} className="animate-spin text-cyan-400" />
-                        <span className="text-xs text-slate-400">Thinking...</span>
+                        <span className="text-xs text-slate-400">{t.chat.thinking}</span>
                       </div>
                     </div>
                   )}
                   <div ref={messagesEndRef} />
                 </div>
 
-                <div className="p-3 bg-slate-900 border-t border-white/10">
+                <div className="p-3 bg-slate-900 border-t border-white/10" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
                   <div className="relative">
                     <input
                       type="text"
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={handleKeyPress}
-                      placeholder="Ask me anything about automation..."
-                      className="w-full bg-slate-800 text-white text-sm rounded-full pl-4 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 border border-slate-700 placeholder-slate-500"
+                      placeholder={t.chat.placeholder}
+                      className="w-full bg-slate-800 text-white text-sm rounded-full pl-4 pr-12 rtl:pr-4 rtl:pl-12 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 border border-slate-700 placeholder-slate-500"
                     />
                     <button 
                       onClick={handleSend}
                       disabled={!input.trim() || isLoading}
-                      className="absolute right-1 top-1 p-2 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-full text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      className="absolute right-1 rtl:right-auto rtl:left-1 top-1 p-2 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-full text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
-                      <Send size={16} />
+                      <Send size={16} className="rtl:rotate-180" />
                     </button>
                   </div>
                 </div>
@@ -459,7 +568,7 @@
               className={`group flex items-center gap-2 bg-gradient-to-r from-secondary to-accent text-white p-4 rounded-full shadow-lg hover:shadow-cyan-500/25 transition-all duration-300 transform hover:scale-105 ${isOpen ? 'rotate-90 scale-0 opacity-0 hidden' : 'scale-100 opacity-100'}`}
             >
               <MessageSquare size={24} className="fill-current" />
-              <span className="font-semibold hidden group-hover:block whitespace-nowrap pr-2">Chat with AI</span>
+              <span className="font-semibold hidden group-hover:block whitespace-nowrap px-2">{lang === 'en' ? 'Chat with AI' : 'تحدث مع الذكاء الاصطناعي'}</span>
             </button>
           </div>
         );
@@ -472,18 +581,27 @@
       );
 
       const FeatureCard = ({ feature }) => {
-        const Icon = feature.icon;
+        // Dynamic icons mapping since we store strings/config in translation object but need components
+        const getIcon = (title) => {
+            // Mapping based on English titles primarily, or generic index logic
+            if(title.includes('Sales') || title.includes('المبيعات')) return TrendingUp;
+            if(title.includes('Marketing') || title.includes('التسويق')) return Globe;
+            if(title.includes('Service') || title.includes('العملاء')) return Phone;
+            return Zap;
+        };
+        const Icon = getIcon(feature.title);
+
         return (
           <div className="glass-card p-8 rounded-2xl hover:bg-blue-900/50 transition-all duration-300 group hover:-translate-y-2">
             <div className="w-14 h-14 bg-blue-900/50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-cyan-500/20 transition-colors">
               <Icon className="text-cyan-400 w-8 h-8" />
             </div>
             <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
-            <p className="text-slate-400 mb-6 leading-relaxed">{feature.description}</p>
+            <p className="text-slate-400 mb-6 leading-relaxed h-16">{feature.desc}</p>
             <ul className="space-y-2">
               {feature.benefits.map((benefit, idx) => (
                 <li key={idx} className="flex items-center gap-2 text-sm text-slate-300">
-                  <CheckCircle size={14} className="text-accent" />
+                  <CheckCircle size={14} className="text-accent min-w-[14px]" />
                   {benefit}
                 </li>
               ))}
@@ -493,12 +611,21 @@
       };
 
       const App = () => {
+        const [lang, setLang] = useState('en');
         const [isScrolled, setIsScrolled] = useState(false);
         const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
         const [email, setEmail] = useState('');
         const [toast, setToast] = useState(null);
         const [showScrollTop, setShowScrollTop] = useState(false);
         const [showCookieConsent, setShowCookieConsent] = useState(true);
+
+        const t = content[lang];
+        const isRTL = lang === 'ar';
+
+        useEffect(() => {
+            document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+            document.documentElement.lang = lang;
+        }, [lang, isRTL]);
 
         useEffect(() => {
           const handleScroll = () => {
@@ -512,22 +639,25 @@
         const handleEmailSubmit = (e) => {
           e.preventDefault();
           if (!email || !email.includes('@')) {
-            setToast({ type: 'error', message: 'Please enter a valid email address.' });
+            setToast({ type: 'error', message: t.toast.emailError });
             return;
           }
-          // Simulate API call
           setTimeout(() => {
-            setToast({ type: 'success', message: "Thanks! We've sent a getting started guide to your inbox." });
+            setToast({ type: 'success', message: t.toast.emailSuccess });
             setEmail('');
           }, 800);
         };
+
+        const toggleLanguage = () => {
+            setLang(prev => prev === 'en' ? 'ar' : 'en');
+        }
 
         const scrollToTop = () => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         return (
-          <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-cyan-500/30">
+          <div className={`min-h-screen bg-slate-950 text-slate-50 selection:bg-cyan-500/30 ${isRTL ? 'font-arabic' : 'font-sans'}`}>
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             
             {/* Navigation */}
@@ -544,15 +674,21 @@
 
                 {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-8">
-                  <NavLink href="#features">Solutions</NavLink>
-                  <NavLink href="#how-it-works">How it Works</NavLink>
-                  <NavLink href="#pricing">Pricing</NavLink>
-                  <NavLink href="#contact">Contact</NavLink>
+                  <NavLink href="#features">{t.nav.solutions}</NavLink>
+                  <NavLink href="#how-it-works">{t.nav.howItWorks}</NavLink>
+                  <NavLink href="#pricing">{t.nav.pricing}</NavLink>
+                  <NavLink href="#contact">{t.nav.contact}</NavLink>
+                  
+                  <button onClick={toggleLanguage} className="flex items-center gap-1 text-slate-300 hover:text-white px-3 py-1 rounded-full border border-white/10 hover:bg-white/5 transition-colors">
+                     <Languages size={16} />
+                     <span className="text-sm font-medium">{lang === 'en' ? 'العربية' : 'English'}</span>
+                  </button>
+
                   <button onClick={() => window.location.href='#contact'} className="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full font-medium transition-all border border-white/10">
-                    Log In
+                    {t.nav.login}
                   </button>
                   <button onClick={() => window.location.href='#pricing'} className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-full font-medium shadow-lg hover:shadow-cyan-500/25 transition-all transform hover:scale-105">
-                    Start Free Trial
+                    {t.nav.startTrial}
                   </button>
                 </div>
 
@@ -568,13 +704,16 @@
               {/* Mobile Menu */}
               {mobileMenuOpen && (
                 <div className="md:hidden absolute top-full left-0 w-full bg-slate-900 border-b border-white/10 p-6 flex flex-col gap-4 animate-fade-in shadow-2xl">
-                  <NavLink href="#features" onClick={() => setMobileMenuOpen(false)}>Solutions</NavLink>
-                  <NavLink href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>How it Works</NavLink>
-                  <NavLink href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</NavLink>
-                  <NavLink href="#contact" onClick={() => setMobileMenuOpen(false)}>Contact</NavLink>
+                  <NavLink href="#features" onClick={() => setMobileMenuOpen(false)}>{t.nav.solutions}</NavLink>
+                  <NavLink href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>{t.nav.howItWorks}</NavLink>
+                  <NavLink href="#pricing" onClick={() => setMobileMenuOpen(false)}>{t.nav.pricing}</NavLink>
+                  <NavLink href="#contact" onClick={() => setMobileMenuOpen(false)}>{t.nav.contact}</NavLink>
+                  <button onClick={() => {toggleLanguage(); setMobileMenuOpen(false);}} className="flex items-center justify-center gap-2 py-3 border border-white/10 rounded-lg text-white">
+                     <Languages size={18} /> {lang === 'en' ? 'Switch to Arabic' : 'Switch to English'}
+                  </button>
                   <div className="h-px bg-white/10 my-2"></div>
-                  <button className="w-full py-3 bg-white/10 rounded-lg font-medium">Log In</button>
-                  <button className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg font-medium">Start Free Trial</button>
+                  <button className="w-full py-3 bg-white/10 rounded-lg font-medium">{t.nav.login}</button>
+                  <button className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg font-medium">{t.nav.startTrial}</button>
                 </div>
               )}
             </nav>
@@ -590,31 +729,35 @@
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
                   </span>
-                  New: Al IstinAi 2.0 is now live
+                  {t.hero.badge}
                 </div>
                 
                 <h1 className="text-5xl lg:text-7xl font-bold text-white tracking-tight mb-8 leading-tight">
-                  Automate Smart. <br />
-                  <span className="gradient-text">Scale Fast.</span>
+                  {t.hero.headlineStart} <br />
+                  <span className="gradient-text">{t.hero.headlineEnd}</span>
                 </h1>
                 
                 <p className="text-lg lg:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-                  Deploy intelligent AI agents that work 24/7 across sales, marketing, and operations. 
-                  Scale your business without scaling your headcount.
+                  {t.hero.subheadline}
                 </p>
                 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
                   <button onClick={() => window.location.href='#pricing'} className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-full font-bold shadow-lg hover:shadow-cyan-500/40 transition-all transform hover:-translate-y-1">
-                    Start Free Trial
+                    {t.hero.ctaPrimary}
                   </button>
                   <button onClick={() => window.location.href='#how-it-works'} className="w-full sm:w-auto px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-full font-bold border border-slate-700 hover:border-slate-600 transition-all flex items-center justify-center gap-2">
-                    <Play size={20} className="fill-current" /> Watch Demo
+                    <Play size={20} className={`fill-current ${isRTL ? 'rotate-180' : ''}`} /> {t.hero.ctaSecondary}
                   </button>
                 </div>
 
                 {/* Stats Bar */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-                  {metrics.map((metric) => {
+                  {[
+                    { id: '1', value: '3x', label: t.stats.revenue, icon: TrendingUp },
+                    { id: '2', value: '40+', label: t.stats.hours, icon: Clock },
+                    { id: '3', value: '60%', label: t.stats.cost, icon: Zap },
+                    { id: '4', value: '95%', label: t.stats.satisfaction, icon: Users },
+                  ].map((metric) => {
                     const Icon = metric.icon;
                     return (
                       <div key={metric.id} className="p-4 rounded-xl bg-white/5 backdrop-blur border border-white/5 hover:bg-white/10 transition-colors">
@@ -633,7 +776,7 @@
             {/* Partners/Trust */}
             <section className="py-10 border-y border-white/5 bg-slate-900/30">
               <div className="container mx-auto px-6 text-center">
-                <p className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-8">Trusted by 500+ High-Growth Companies</p>
+                <p className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-8">{t.trust}</p>
                 <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
                   {['Stripe', 'HubSpot', 'Shopify', 'Slack', 'Salesforce'].map(brand => (
                     <span key={brand} className="text-xl font-bold text-slate-300 cursor-default hover:text-white transition-colors">{brand}</span>
@@ -647,15 +790,15 @@
               <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
               <div className="container mx-auto px-6">
                 <div className="text-center mb-16">
-                  <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Meet Your New <span className="text-cyan-400">AI Workforce</span></h2>
+                  <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">{t.features.title} <span className="text-cyan-400">{t.features.titleHighlight}</span></h2>
                   <p className="text-slate-400 max-w-2xl mx-auto">
-                    Our intelligent agents learn, adapt, and execute complex workflows autonomously.
+                    {t.features.subtitle}
                   </p>
                 </div>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {features.map(feature => (
-                    <FeatureCard key={feature.id} feature={feature} />
+                  {t.features.items.map((feature, i) => (
+                    <FeatureCard key={i} feature={feature} />
                   ))}
                 </div>
               </div>
@@ -664,21 +807,16 @@
             {/* How It Works (Visual) */}
             <section id="how-it-works" className="py-24 bg-slate-950 scroll-mt-20">
               <div className="container mx-auto px-6">
-                <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-16">How Al IstinAi Works</h2>
+                <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-16">{t.howItWorks.title}</h2>
                 <div className="relative">
                   {/* Connecting Line */}
                   <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-slate-800 -translate-y-1/2 z-0"></div>
                   
                   <div className="grid md:grid-cols-4 gap-8 relative z-10">
-                    {[
-                      { step: '01', title: 'Connect', desc: 'Integrate with your existing tools in minutes.' },
-                      { step: '02', title: 'Configure', desc: 'Customize agents to your specific business needs.' },
-                      { step: '03', title: 'Deploy', desc: 'Launch AI agents across your workflows instantly.' },
-                      { step: '04', title: 'Scale', desc: 'Watch your business grow on autopilot.' }
-                    ].map((item, i) => (
+                    {t.howItWorks.steps.map((item, i) => (
                       <div key={i} className="bg-slate-900 border border-slate-800 p-6 rounded-2xl text-center hover:border-cyan-500/50 transition-colors">
                         <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center text-cyan-400 font-bold text-xl mx-auto mb-4 border border-slate-700">
-                          {item.step}
+                          {`0${i+1}`}
                         </div>
                         <h3 className="text-lg font-bold text-white mb-2">{item.title}</h3>
                         <p className="text-slate-400 text-sm">{item.desc}</p>
@@ -693,29 +831,34 @@
             <section id="pricing" className="py-24 scroll-mt-20">
               <div className="container mx-auto px-6">
                 <div className="text-center mb-16">
-                  <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Simple, Transparent Pricing</h2>
-                  <p className="text-slate-400">Start with a 14-day free trial. No credit card required.</p>
+                  <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">{t.pricing.title}</h2>
+                  <p className="text-slate-400">{t.pricing.subtitle}</p>
                 </div>
 
                 <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                  {pricing.map((plan, idx) => (
-                    <div key={idx} className={`relative p-8 rounded-2xl border flex flex-col ${plan.popular ? 'bg-slate-900/80 border-cyan-500 shadow-2xl shadow-cyan-900/20 transform scale-105 z-10' : 'bg-slate-900/40 border-slate-800'}`}>
-                      {plan.popular && (
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-                          Most Popular
+                  {t.pricing.plans.map((plan, idx) => {
+                    const isGrowth = idx === 1;
+                    const price = idx === 0 ? '$99' : idx === 1 ? '$299' : 'Custom';
+                    const ctaLabel = idx === 0 ? t.pricing.cta.starter : idx === 1 ? t.pricing.cta.growth : t.pricing.cta.enterprise;
+                    
+                    return (
+                    <div key={idx} className={`relative p-8 rounded-2xl border flex flex-col ${isGrowth ? 'bg-slate-900/80 border-cyan-500 shadow-2xl shadow-cyan-900/20 transform scale-105 z-10' : 'bg-slate-900/40 border-slate-800'}`}>
+                      {isGrowth && (
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide whitespace-nowrap">
+                          {t.pricing.popular}
                         </div>
                       )}
                       <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
-                      <div className="flex items-baseline mb-4">
-                        <span className="text-4xl font-bold text-white">{plan.price}</span>
-                        <span className="text-slate-500 ml-1">{plan.period}</span>
+                      <div className="flex items-baseline mb-4" dir="ltr">
+                        <span className="text-4xl font-bold text-white">{price}</span>
+                        {idx !== 2 && <span className="text-slate-500 ml-1">/mo</span>}
                       </div>
-                      <p className="text-slate-400 mb-8">{plan.description}</p>
+                      <p className="text-slate-400 mb-8">{plan.desc}</p>
                       
                       <ul className="space-y-3 mb-8 flex-1">
                         {plan.features.map((feature, fIdx) => (
                           <li key={fIdx} className="flex items-center gap-3 text-sm text-slate-300">
-                            <CheckCircle size={16} className={plan.popular ? "text-cyan-400" : "text-slate-500"} />
+                            <CheckCircle size={16} className={isGrowth ? "text-cyan-400" : "text-slate-500"} />
                             {feature}
                           </li>
                         ))}
@@ -723,14 +866,14 @@
                       
                       <button 
                         onClick={() => {
-                          setToast({ type: 'success', message: `Selected ${plan.name} plan. Redirecting to checkout...` });
+                          setToast({ type: 'success', message: t.toast.planSelected.replace('{plan}', plan.name) });
                         }}
-                        className={`w-full py-3 rounded-lg font-bold transition-all ${plan.popular ? 'bg-cyan-500 hover:bg-cyan-400 text-white' : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'}`}
+                        className={`w-full py-3 rounded-lg font-bold transition-all ${isGrowth ? 'bg-cyan-500 hover:bg-cyan-400 text-white' : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'}`}
                       >
-                        {plan.cta}
+                        {ctaLabel}
                       </button>
                     </div>
-                  ))}
+                  )})}
                 </div>
               </div>
             </section>
@@ -740,23 +883,23 @@
               <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-slate-900"></div>
               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
               <div className="container mx-auto px-6 relative z-10 text-center">
-                <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">Ready to Transform Your Business?</h2>
+                <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">{t.contact.title}</h2>
                 <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-                  Join 500+ forward-thinking companies growing with Al IstinAi today.
+                  {t.contact.subtitle}
                 </p>
                 <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
                   <input 
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your work email" 
-                    className="flex-1 px-6 py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" 
+                    placeholder={t.contact.placeholder} 
+                    className="flex-1 px-6 py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all rtl:text-right" 
                   />
                   <button type="submit" className="px-8 py-4 bg-white text-blue-900 font-bold rounded-full hover:bg-blue-50 transition-colors shadow-lg">
-                    Get Started
+                    {t.contact.cta}
                   </button>
                 </form>
-                <p className="mt-4 text-sm text-blue-300 opacity-80">No credit card required. Cancel anytime.</p>
+                <p className="mt-4 text-sm text-blue-300 opacity-80">{t.contact.note}</p>
               </div>
             </section>
 
@@ -770,21 +913,21 @@
                       <span className="text-xl font-bold text-white">Al IstinAi</span>
                     </div>
                     <p className="text-slate-500 text-sm leading-relaxed mb-6">
-                      Empowering businesses with intelligent automation. We build the future of work.
+                      {t.footer.tagline}
                     </p>
                   </div>
                   
                   <div>
-                    <h4 className="font-bold text-white mb-6">Product</h4>
+                    <h4 className="font-bold text-white mb-6">{t.footer.product}</h4>
                     <ul className="space-y-3 text-sm text-slate-500">
-                      <li><a href="#" className="hover:text-cyan-400 transition-colors">Sales Agent</a></li>
-                      <li><a href="#" className="hover:text-cyan-400 transition-colors">Marketing Agent</a></li>
-                      <li><a href="#" className="hover:text-cyan-400 transition-colors">Customer Service</a></li>
+                      <li><a href="#" className="hover:text-cyan-400 transition-colors">{t.features.items[0].title}</a></li>
+                      <li><a href="#" className="hover:text-cyan-400 transition-colors">{t.features.items[1].title}</a></li>
+                      <li><a href="#" className="hover:text-cyan-400 transition-colors">{t.features.items[2].title}</a></li>
                     </ul>
                   </div>
 
                   <div>
-                    <h4 className="font-bold text-white mb-6">Company</h4>
+                    <h4 className="font-bold text-white mb-6">{t.footer.company}</h4>
                     <ul className="space-y-3 text-sm text-slate-500">
                       <li><a href="#" className="hover:text-cyan-400 transition-colors">About Us</a></li>
                       <li><a href="#" className="hover:text-cyan-400 transition-colors">Careers</a></li>
@@ -793,7 +936,7 @@
                   </div>
 
                   <div>
-                    <h4 className="font-bold text-white mb-6">Legal</h4>
+                    <h4 className="font-bold text-white mb-6">{t.footer.legal}</h4>
                     <ul className="space-y-3 text-sm text-slate-500">
                       <li><a href="#" className="hover:text-cyan-400 transition-colors">Privacy Policy</a></li>
                       <li><a href="#" className="hover:text-cyan-400 transition-colors">Terms of Service</a></li>
@@ -803,7 +946,7 @@
                 </div>
                 
                 <div className="border-t border-slate-900 pt-8 flex flex-col md:flex-row justify-between items-center text-slate-600 text-sm">
-                  <div>&copy; 2024 Al IstinAi Inc. All rights reserved.</div>
+                  <div>{t.footer.rights}</div>
                   <div className="flex gap-6 mt-4 md:mt-0">
                     <a href="#" className="hover:text-slate-400">Terms</a>
                     <a href="#" className="hover:text-slate-400">Privacy</a>
@@ -816,7 +959,7 @@
             {showScrollTop && (
               <button 
                 onClick={scrollToTop}
-                className="fixed bottom-6 left-6 z-40 p-3 bg-slate-800 text-white rounded-full shadow-lg border border-slate-700 hover:bg-cyan-600 transition-all animate-fade-in"
+                className="fixed bottom-6 left-6 rtl:right-6 rtl:left-auto z-40 p-3 bg-slate-800 text-white rounded-full shadow-lg border border-slate-700 hover:bg-cyan-600 transition-all animate-fade-in"
               >
                 <ArrowUp size={20} />
               </button>
@@ -826,28 +969,28 @@
             {showCookieConsent && (
               <div className="fixed bottom-0 left-0 w-full bg-slate-900 border-t border-slate-800 p-4 z-50 animate-slide-up shadow-2xl">
                 <div className="container mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                  <p className="text-sm text-slate-400 text-center sm:text-left">
-                    We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.
+                  <p className="text-sm text-slate-400 text-center sm:text-left rtl:text-right">
+                    {t.cookie.text}
                   </p>
                   <div className="flex gap-4">
                     <button 
                       onClick={() => setShowCookieConsent(false)}
                       className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-medium transition-colors"
                     >
-                      Decline
+                      {t.cookie.decline}
                     </button>
                     <button 
                       onClick={() => setShowCookieConsent(false)}
                       className="px-6 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-sm font-medium transition-colors"
                     >
-                      Accept
+                      {t.cookie.accept}
                     </button>
                   </div>
                 </div>
               </div>
             )}
 
-            <DemoWidget />
+            <DemoWidget lang={lang} t={t} />
           </div>
         );
       };
